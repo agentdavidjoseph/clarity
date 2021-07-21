@@ -110,7 +110,7 @@ export function castHtmlElementToFocusTrapElement(el: HTMLElement): FocusTrapEle
 
 export class FocusTrap {
   focusTrapElement: FocusTrapElement;
-  private previousFocus: HTMLElement;
+  previousFocus: HTMLElement;
   private onFocusInEvent: any;
 
   firstFocusElement: HTMLElement | FocusTrapElement;
@@ -131,7 +131,7 @@ export class FocusTrap {
     const fte = this.focusTrapElement;
     const firstFocusElement = fte.querySelector('[cds-first-focus]');
     const contentWrapper = fte.shadowRoot ? fte.shadowRoot.querySelector('.private-host[tabindex]') : null;
-    const activeEl = document.activeElement;
+    const activeEl = (this.focusTrapElement.getRootNode() as any).activeElement;
 
     if (FocusTrapTrackerService.getCurrent() === fte) {
       throw new Error('Focus trap is already enabled for this instance.');

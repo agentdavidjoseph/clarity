@@ -29,7 +29,7 @@ export const packageCheck = dir => {
 export const webComponentAnalyer = outDir => {
   return execute({
     commands: [
-      `cd ${resolve(outDir)} && cem analyze --litelement`, // https://github.com/open-wc/custom-elements-manifest/tree/master/packages/analyzer
+      `cd dist/core && cem analyze --config ${resolve('./custom-elements-manifest.config.mjs')}`, // https://github.com/open-wc/custom-elements-manifest/tree/master/packages/analyzer
       `wca analyze ${resolve(outDir)} --silent --format=json --outFile ${resolve(
         outDir,
         'custom-elements.legacy.json'
@@ -168,9 +168,10 @@ export const addComponentEntryPoints = (packageFile, config) => {
     ${[modules, explicitExports, components, styles].join(',')}
   }`);
 
-  const sideEffects = config.entryPoints.components.map(
-    name => `.${resolve(name).replace(resolve(config.baseDir), '')}/register.js`
-  );
+  const sideEffects = [
+    ...config.entryPoints.components.map(name => `.${resolve(name).replace(resolve(config.baseDir), '')}/register.js`),
+    ...config.entryPoints.explicitSideEffects,
+  ];
 
   return JSON.stringify({ ...JSON.parse(packageFile), sideEffects, exports }, null, 2);
 };

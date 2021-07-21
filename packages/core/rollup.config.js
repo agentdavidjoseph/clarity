@@ -25,12 +25,15 @@ import {
   esmCache,
 } from './rollup.utils.js';
 
+import { idiomaticDecoratorsTransformer, constructorCleanupTransformer } from '@lit/ts-transformers';
+
 const config = {
   baseDir: './src',
   outDir: './dist/core',
   entryPoints: {
-    modules: ['./src', './src/internal', './src/test'],
+    modules: ['./src', './src/internal', './src/polyfills', './src/demo', './src/test'],
     components: [
+      './src/actions',
       './src/accordion',
       './src/alert',
       './src/badge',
@@ -43,6 +46,7 @@ const config = {
       './src/divider',
       './src/file',
       './src/forms',
+      './src/grid',
       './src/icon',
       './src/input',
       './src/internal-components/close-button',
@@ -89,7 +93,9 @@ const config = {
       { input: './tokens/tokens.scss', output: './tokens/tokens.scss' },
       { input: './tokens/tokens.ios.swift', output: './tokens/tokens.ios.swift' },
       { input: './tokens/tokens.android.xml', output: './tokens/tokens.android.xml' },
+      { input: './polyfills/index.js', output: './polyfills/index.js' },
     ],
+    explicitSideEffects: ['./polyfills/index.js', './polyfills/at.js', './polyfills/aria-reflect.js'],
   },
 };
 
@@ -120,7 +126,13 @@ export default [
       styles({ mode: 'emit', plugins: [autoprefixer] }),
       litSass(),
       nodeResolve(),
-      typescript({ tsconfig: './tsconfig.lib.json' }),
+      typescript({
+        tsconfig: './tsconfig.lib.json',
+        transformers: {
+          before: [{ type: 'program', factory: idiomaticDecoratorsTransformer }],
+          after: [{ type: 'program', factory: constructorCleanupTransformer }],
+        },
+      }),
       copy({
         copyOnce: true,
         targets: [
@@ -135,7 +147,7 @@ export default [
       }),
       !prod ? esmCache(config.outDir) : [],
       prod ? minifyHTML() : [],
-      prod ? terser({ ecma: 2020, warnings: true, module: true, compress: { unsafe: true, passes: 2 } }) : [],
+      prod ? terser({ ecma: 2020, warnings: true, module: true, compress: false }) : [],
       prod ? replace({ preventAssignment: false, values: { PACKAGE_VERSION: version } }) : [],
       prod ? webComponentAnalyer(config.outDir) : [],
       prod ? packageCheck(config.outDir) : [],

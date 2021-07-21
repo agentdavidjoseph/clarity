@@ -6,8 +6,8 @@
 
 import { LitElement, html } from 'lit';
 import { createTestElement, removeTestElement } from '@cds/core/test';
-import { registerElementSafely } from '@cds/core/internal';
 import {
+  registerElementSafely,
   addAttributeValue,
   assignSlotNames,
   getElementWidth,
@@ -24,7 +24,9 @@ import {
   spanWrapper,
   isFocusable,
   queryChildFromLightOrShadowDom,
-} from './dom.js';
+  isElementTextInputType,
+  getInputValueType,
+} from '@cds/core/internal';
 
 /** @element test-dom-spec-element */
 export class TestElement extends LitElement {
@@ -590,6 +592,63 @@ describe('Functional Helper: ', () => {
       expect(el).not.toBeNull();
       expect(el.id).toBe('found');
       removeTestElement(nonShadyHost);
+    });
+  });
+
+  describe('isElementTextInputType() ', () => {
+    let testElement: any;
+
+    afterEach(() => {
+      removeTestElement(testElement);
+    });
+
+    it('checkboxes return false', async () => {
+      testElement = await createTestElement(html`<input type="checkbox" />`);
+      expect(isElementTextInputType(testElement.querySelector('input'))).toBe(false);
+    });
+
+    it('radios return false', async () => {
+      testElement = await createTestElement(html`<input type="radio" />`);
+      expect(isElementTextInputType(testElement.querySelector('input'))).toBe(false);
+    });
+
+    it('buttons return false', async () => {
+      testElement = await createTestElement(html`<button></button>`);
+      expect(isElementTextInputType(testElement.querySelector('button'))).toBe(false);
+    });
+
+    it('text input return true', async () => {
+      testElement = await createTestElement(html`<input type="text" />`);
+      expect(isElementTextInputType(testElement.querySelector('input'))).toBe(true);
+    });
+
+    it('default text input return true', async () => {
+      testElement = await createTestElement(html`<input />`);
+      expect(isElementTextInputType(testElement.querySelector('input'))).toBe(true);
+    });
+
+    it('textarea returns true', async () => {
+      testElement = await createTestElement(html`<textarea></textarea>`);
+      expect(isElementTextInputType(testElement.querySelector('textarea'))).toBe(true);
+    });
+
+    it('select returns true', async () => {
+      testElement = await createTestElement(html`<select></select>`);
+      expect(isElementTextInputType(testElement.querySelector('select'))).toBe(true);
+    });
+  });
+
+  describe('getInputValueType() ', () => {
+    it('string should return text type', async () => {
+      expect(getInputValueType('hello')).toBe('text');
+    });
+
+    it('numeric string should return number type', async () => {
+      expect(getInputValueType('10')).toBe('number');
+    });
+
+    it('date string should return number type', async () => {
+      expect(getInputValueType('2018-12-31')).toBe('date');
     });
   });
 });

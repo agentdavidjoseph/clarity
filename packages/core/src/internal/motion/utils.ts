@@ -329,11 +329,13 @@ export function sizeDimensionKeyframes(animationKeyframes: AnimationKeyframes, h
   }
 
   return animationKeyframes.map((kf: Keyframe) => {
+    // eslint-disable-next-line
     if (kf?.hasOwnProperty('height') && isPrefixedBy(kf?.height?.toString() || '', 'from:')) {
       const selector = removePrefix(kf?.height?.toString() || '', 'from:');
       const measureTarget = queryChildFromLightOrShadowDom(hostEl, selector) || null;
       kf.height = !measureTarget ? 'auto' : measureTarget.getBoundingClientRect().height + 'px';
     }
+    // eslint-disable-next-line
     if (kf?.hasOwnProperty('width') && isPrefixedBy(kf?.width?.toString() || '', 'from:')) {
       const selector = removePrefix(kf?.width?.toString() || '', 'from:');
       const measureTarget = queryChildFromLightOrShadowDom(hostEl, selector) || null;

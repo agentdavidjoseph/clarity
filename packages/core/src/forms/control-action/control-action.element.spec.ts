@@ -7,7 +7,6 @@
 import { html } from 'lit';
 import { CdsControlAction } from '@cds/core/forms';
 import { createTestElement, removeTestElement, componentIsStable } from '@cds/core/test';
-import { LogService } from '@cds/core/internal';
 import '@cds/core/forms/register.js';
 
 describe('cds-control-action', () => {
@@ -29,16 +28,6 @@ describe('cds-control-action', () => {
     controlAction.action = 'suffix';
     await componentIsStable(controlAction);
     expect(controlAction.getAttribute('slot')).toBe('suffix');
-  });
-
-  it('should warn when a aria-label is missing and interactive', async () => {
-    spyOn(LogService, 'warn');
-
-    controlAction.readonly = true;
-    await componentIsStable(controlAction);
-    controlAction.readonly = false;
-    await componentIsStable(controlAction);
-    expect(LogService.warn).toHaveBeenCalled();
   });
 
   describe('syncAria: ', () => {

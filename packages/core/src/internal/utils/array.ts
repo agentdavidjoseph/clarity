@@ -28,3 +28,21 @@ export function nextInArray(current: any, arr: any[]) {
   const idx = arr.indexOf(current);
   return idx === -1 ? void 0 : arr[Math.min(idx + 1, arr.length - 1)];
 }
+
+// todo: cory test
+export function groupArray<T>(arr: T[], size: number) {
+  return [...arr].reduce((acc, val, i) => {
+    const idx = Math.floor(i / size);
+    const page = acc[idx] || (acc[idx] = []);
+    page.push(val);
+    return acc;
+  }, [] as T[][]);
+}
+
+export async function* asyncGroupArray(items: any[], batch = 100) {
+  const values = groupArray(items, batch);
+  for (let i = 0; i < values.length; i++) {
+    yield values[i];
+    await new Promise(r => setTimeout(r, 0));
+  }
+}

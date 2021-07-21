@@ -67,3 +67,12 @@ export function getCssPropertyValue(
 export function isCssPropertyName(str: any): boolean {
   return !!str && isString(str) && str.slice(0, 2) === '--';
 }
+
+export function supportsAdoptingStyleSheets() {
+  return (
+    window.ShadowRoot &&
+    ((window as any).ShadyCSS === undefined || (window as any).ShadyCSS.nativeShadow) &&
+    'adoptedStyleSheets' in Document.prototype &&
+    'replace' in CSSStyleSheet.prototype
+  );
+}

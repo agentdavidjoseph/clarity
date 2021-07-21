@@ -69,8 +69,8 @@ export const CdsNavigationTagName = 'cds-navigation';
  * @cssprop --nested-padding
  * @cssprop --padding
  * @slot
- * @slot - cds-navigation-substart - project content below the navigation toggle button
- * @slot - cds-navigation-end - project content below the scrollable section
+ * @slot cds-navigation-substart - project content below the navigation toggle button
+ * @slot cds-navigation-end - project content below the scrollable section
  */
 @animate({
   expanded: {
@@ -83,9 +83,6 @@ export class CdsNavigation extends LitElement implements Animatable {
 
   @property({ type: String })
   cdsMotion = 'on';
-
-  @property({ type: String })
-  role = 'list';
 
   @event()
   protected expandedChange: EventEmitter<boolean>;
@@ -101,12 +98,6 @@ export class CdsNavigation extends LitElement implements Animatable {
    */
   @state({ type: Boolean })
   protected groupItem = true;
-
-  /**
-   * Set and update the aria-active descended value onto the navigation.
-   */
-  @state({ type: String })
-  ariaActiveDescendant: any;
 
   /**
    *
@@ -182,6 +173,8 @@ export class CdsNavigation extends LitElement implements Animatable {
    */
   @querySlotAll('cds-navigation-group')
   protected navigationGroupRefs: NodeListOf<CdsNavigationGroup>;
+
+  role = 'list';
 
   private toggle() {
     this.expandedChange.emit(!this.expanded);
@@ -389,7 +382,7 @@ export class CdsNavigation extends LitElement implements Animatable {
       ${this.startTemplate}
       <slot name="cds-navigation-substart"></slot>
       <nav class="navigation-body-wrapper">
-        <div aria-activedescendant="${this.ariaActiveDescendant}" tabindex="0" id="item-container">
+        <div .ariaActiveDescendant=${this.ariaActiveDescendant} tabindex="0" id="item-container">
           <div class="navigation-body" cds-layout="vertical wrap:none align:horizontal-stretch">
             <slot></slot>
           </div>

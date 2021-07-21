@@ -18,6 +18,7 @@ import {
   property,
   AnimationModalEnterName,
   reverseAnimation,
+  AriaPopupController,
 } from '@cds/core/internal';
 import { html } from 'lit';
 import { query } from 'lit/decorators/query.js';
@@ -93,10 +94,16 @@ export class CdsInternalOverlay extends CdsBaseFocusTrap implements Animatable {
   cdsMotionChange: EventEmitter<string>;
 
   @property({ type: String })
-  ariaModal = 'true';
+  ariaModal: 'true' = 'true';
 
   @property({ type: String })
   role = 'dialog';
+
+  protected ariaPopupController = new AriaPopupController(this);
+
+  get trigger() {
+    return this.focusTrap.previousFocus;
+  }
 
   // renderRoot needs delegatesFocus so that focus can cross the shadowDOM
   // inside an element with aria-modal set to true
@@ -116,7 +123,7 @@ export class CdsInternalOverlay extends CdsBaseFocusTrap implements Animatable {
 
   firstUpdated(props: Map<string, any>) {
     super.firstUpdated(props);
-    this.backdrop.addEventListener('click', this.fireEventOnBackdropClick);
+    this.backdrop?.addEventListener('click', this.fireEventOnBackdropClick);
   }
 
   updated(props: Map<string, any>) {
@@ -143,7 +150,7 @@ export class CdsInternalOverlay extends CdsBaseFocusTrap implements Animatable {
   disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('keydown', this.fireEventOnEscape);
-    this.backdrop.removeEventListener('click', this.fireEventOnBackdropClick);
+    this.backdrop?.removeEventListener('click', this.fireEventOnBackdropClick);
   }
 
   constructor() {
@@ -167,7 +174,7 @@ export class CdsInternalOverlay extends CdsBaseFocusTrap implements Animatable {
   protected render() {
     return html`
       ${this.backdropTemplate}
-      <div class="private-host" tabindex="-1" aria-modal="true" role="dialog">
+      <div class="private-host" part="private-host" tabindex="-1" aria-modal="true" role="dialog">
         <slot></slot>
       </div>
     `;

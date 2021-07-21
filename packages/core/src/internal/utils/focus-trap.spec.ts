@@ -6,8 +6,9 @@
 
 import { html } from 'lit';
 import { createTestElement, removeTestElement } from '@cds/core/test';
-import { registerElementSafely, sleep } from '@cds/core/internal';
 import {
+  registerElementSafely,
+  sleep,
   addReboundElementsToFocusTrapElement,
   castHtmlElementToFocusTrapElement,
   createFocusTrapReboundElement,
@@ -16,9 +17,10 @@ import {
   FocusTrapElement,
   refocusIfOutsideFocusTrapElement,
   removeReboundElementsFromFocusTrapElement,
-} from './focus-trap.js';
-import { CdsBaseFocusTrap } from '../base/focus-trap.base.js';
-import { CDS_FOCUS_TRAP_DOCUMENT_ATTR, FocusTrapTrackerService } from '../services/focus-trap-tracker.service.js';
+  CdsBaseFocusTrap,
+  CDS_FOCUS_TRAP_DOCUMENT_ATTR,
+  FocusTrapTrackerService,
+} from '@cds/core/internal';
 
 declare global {
   interface HTMLElementTagNameMap {

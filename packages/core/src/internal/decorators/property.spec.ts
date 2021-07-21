@@ -6,8 +6,7 @@
 
 import { componentIsStable, createTestElement, removeTestElement } from '@cds/core/test';
 import { html, LitElement } from 'lit';
-import { registerElementSafely } from '../utils/register.js';
-import { getDefaultOptions, requirePropertyCheck, state } from './property.js';
+import { registerElementSafely, getDefaultOptions, requirePropertyCheck, state } from '@cds/core/internal';
 
 const prop = 'prop';
 

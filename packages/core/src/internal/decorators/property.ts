@@ -3,12 +3,12 @@
  * This software is released under MIT license.
  * The full license information can be found in LICENSE in the root directory of this project.
  */
-
-import { property as _property } from 'lit/decorators/property.js';
+import { ReactiveElement } from 'lit';
 import { camelCaseToKebabCase, kebabCaseToPascalCase, capitalizeFirstLetter } from '../utils/string.js';
 import { LogService } from '../services/log.service.js';
 import { getAngularVersion, getReactVersion, getVueVersion } from '../utils/framework.js';
 import { isNilOrEmpty } from '../utils/identity.js';
+import { ClassElement } from './utils.js';
 
 export interface CustomPropertyConfig {
   type: unknown;
@@ -113,9 +113,11 @@ function getRequiredMessage(level = 'warning', propertyName: string, tagName: st
  * @ExportDecoratedItems
  */
 export function property(options?: PropertyConfig) {
-  return (protoOrDescriptor: any, name: string) => {
-    requirePropertyCheck(protoOrDescriptor, name, options);
-    return _property(getDefaultOptions(name, options))(protoOrDescriptor, name);
+  return (protoOrDescriptor: any, name?: PropertyKey) => {
+    if (options.required) {
+      requirePropertyCheck(protoOrDescriptor, name as string, options);
+    }
+    return _property(getDefaultOptions(name as string, options))(protoOrDescriptor, name);
   };
 }
 
@@ -146,7 +148,7 @@ export interface PropertyDeclaration<Type = unknown, TypeHint = unknown> {
  * @ExportDecoratedItems
  */
 export function state(options?: PropertyConfig) {
-  return (protoOrDescriptor: any, name: string) => {
+  return (protoOrDescriptor: any, name?: string) => {
     const defaultOptions: any = getDefaultOptions(name, options);
 
     if (defaultOptions) {
@@ -162,3 +164,42 @@ export function state(options?: PropertyConfig) {
     return _property(defaultOptions)(protoOrDescriptor, name);
   };
 }
+
+// lit standard property import { property } from 'lit/decorators/property.js';
+// inlined for https://github.com/lit/lit/tree/main/packages/ts-transformers optimization
+function _property(options?: PropertyDeclaration) {
+  return (protoOrDescriptor: Object | ClassElement, name?: PropertyKey): any =>
+    name !== undefined
+      ? legacyProperty(options!, protoOrDescriptor as Object, name)
+      : standardProperty(options!, protoOrDescriptor as ClassElement);
+}
+
+const legacyProperty = (options: PropertyDeclaration, proto: Object, name: PropertyKey) =>
+  (proto.constructor as typeof ReactiveElement).createProperty(name, options);
+
+const standardProperty = (options: PropertyDeclaration, element: ClassElement) => {
+  if (element.kind === 'method' && element.descriptor && !('value' in element.descriptor)) {
+    return {
+      ...element,
+      finisher(clazz: typeof ReactiveElement) {
+        clazz.createProperty(element.key, options);
+      },
+    };
+  } else {
+    return {
+      kind: 'field',
+      key: Symbol(),
+      placement: 'own',
+      descriptor: {},
+      originalKey: element.key,
+      initializer(this: { [key: string]: unknown }) {
+        if (typeof element.initializer === 'function') {
+          this[element.key as string] = element.initializer.call(this);
+        }
+      },
+      finisher(clazz: typeof ReactiveElement) {
+        clazz.createProperty(element.key, options);
+      },
+    };
+  }
+};

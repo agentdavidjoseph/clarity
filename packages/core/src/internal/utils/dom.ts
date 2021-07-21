@@ -5,8 +5,7 @@
  */
 import includes from 'ramda/es/includes.js';
 import without from 'ramda/es/without.js';
-
-import { isStringAndNotNilOrEmpty } from './identity.js';
+import { isNumericString, isStringAndNotNilOrEmpty } from './identity.js';
 
 /**
  * We are not going to be opinionated about the use of the disabled attribute here.
@@ -130,21 +129,6 @@ export function assignSlotNames(...slotTuples: [HTMLElement, string | boolean][]
   });
 }
 
-export function listenForAttributeChange(
-  element: HTMLElement,
-  attrName: string,
-  fn: (attrValue: string | null) => void
-) {
-  const observer = new MutationObserver(mutations => {
-    if (mutations.find(m => m.attributeName === attrName)) {
-      fn(element.getAttribute(attrName));
-    }
-  });
-
-  observer.observe(element, { attributes: true });
-  return observer;
-}
-
 export function isVisible(element: HTMLElement) {
   return !!element && element?.offsetHeight > 0 && element?.hasAttribute('hidden') === false;
 }
@@ -165,4 +149,18 @@ export function queryChildFromLightOrShadowDom(hostEl: Element, selector?: strin
   }
 
   return hostEl.querySelector(selector) || hostEl?.shadowRoot?.querySelector(selector) || null;
+}
+
+export function isElementTextInputType(e: HTMLInputElement) {
+  return /^(?:input|select|textarea)$/i.test(e.nodeName) && e.type !== 'radio' && e.type !== 'checkbox';
+}
+
+export function getInputValueType(value: string) {
+  if (isNumericString(value)) {
+    return 'number';
+  } else if (value.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+    return 'date';
+  } else {
+    return 'text';
+  }
 }

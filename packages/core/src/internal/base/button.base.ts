@@ -6,11 +6,14 @@
 
 import { html, LitElement, render } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
-
 import { property, state } from '../decorators/property.js';
 import { querySlot } from '../decorators/query-slot.js';
 import { onAnyKey } from '../utils/keycodes.js';
 import { stopEvent } from './../utils/events.js';
+import { AriaPopupTriggerController } from '../controllers/aria-popup-trigger.controller.js';
+import { ActiveInteractionController } from '../controllers/active-interaction.controller.js';
+import { AriaDisabledController } from '../controllers/aria-disabled.controller.js';
+import { AriaPressedController } from '../controllers/aria-pressed.controller.js';
 
 // @dynamic
 export class CdsBaseButton extends LitElement {
@@ -24,21 +27,21 @@ export class CdsBaseButton extends LitElement {
 
   @property({ type: Boolean }) disabled = false;
 
-  @state({ type: String, attribute: 'aria-disabled', reflect: true }) ariaDisabled: 'true' | 'false' | null = 'false';
-
-  @state({ type: Number, attribute: 'tabindex', reflect: true }) protected tabIndexAttr: number | null; // don't override native prop as it stops native focus behavior
-
-  @state({ type: Boolean, reflect: true }) protected focused = false;
-
-  @state({ type: Boolean, reflect: true }) protected active = false;
-
-  @state({ type: String, reflect: true, attribute: 'role' }) protected role: string | null = 'button';
+  @property({ type: Boolean }) pressed: boolean;
 
   @state({ type: Boolean, reflect: true }) protected isAnchor = false;
 
   @querySlot('cds-icon') protected icon: HTMLElement;
 
   @querySlot('cds-badge') protected badge: HTMLElement;
+
+  protected ariaPressedController = new AriaPressedController(this);
+
+  protected ariaDisabledController = new AriaDisabledController(this);
+
+  protected ariaPopupAnchorController = new AriaPopupTriggerController(this);
+
+  protected activeInteractionController = new ActiveInteractionController(this);
 
   private marker: HTMLElement;
 
@@ -55,7 +58,7 @@ export class CdsBaseButton extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.tabIndex = 0; // initialize immediately so button can be focused synchronously
+    this.role = 'button';
   }
 
   protected updated(props: Map<string, any>) {
@@ -75,39 +78,19 @@ export class CdsBaseButton extends LitElement {
     }
   }
 
-  /** This mimics the mouse-click visual behavior for keyboard only users and screen readers.
-   * Browsers do not apply the CSS psuedo-selector :active in those instances. So we need this
-   * for our :active styles to show.
-   *
-   * Make sure to update a component's CSS to account for the presence of the [_active] attribute
-   * in all instance where :active is defined.
-   *
-   * @private
-   */
-  private emulateActiveMouseDown() {
-    if (!this.disabled && !this.readonly) {
-      this.active = true;
-    }
-  }
-
   private emulateActiveMouseUp() {
-    this.active = false;
     this.explicitClick = true; // mouse down/up are only associated with real clicks
   }
 
   private setupNativeButtonBehavior() {
     if (this.readonly) {
       this.removeEventListener('keyup', this.emulateActiveMouseUp);
-      this.removeEventListener('keydown', this.emulateActiveMouseDown);
       this.removeEventListener('mouseup', this.emulateActiveMouseUp);
-      this.removeEventListener('mousedown', this.emulateActiveMouseDown);
       this.removeEventListener('click', this.triggerNativeButtonBehavior);
       this.removeEventListener('keyup', this.emulateKeyBoardEventBehavior);
     } else {
       this.addEventListener('keyup', this.emulateActiveMouseUp);
-      this.addEventListener('keydown', this.emulateActiveMouseDown);
       this.addEventListener('mouseup', this.emulateActiveMouseUp);
-      this.addEventListener('mousedown', this.emulateActiveMouseDown);
       this.addEventListener('click', this.triggerNativeButtonBehavior);
       this.addEventListener('keyup', this.emulateKeyBoardEventBehavior);
     }
@@ -188,15 +171,11 @@ export class CdsBaseButton extends LitElement {
     }
 
     this.readonly = this.readonly || this.isAnchor;
-
     if (this.readonly) {
       this.role = null;
-      this.tabIndexAttr = null;
-      this.ariaDisabled = null;
+      this.disabled = null;
     } else {
       this.role = 'button';
-      this.tabIndexAttr = this.disabled ? -1 : 0;
-      this.ariaDisabled = this.disabled ? 'true' : 'false';
     }
   }
 
