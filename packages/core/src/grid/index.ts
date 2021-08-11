@@ -8,4 +8,4 @@ export * from './row/grid-row.element.js';
 export * from './grid/grid.element.js';
 
 // temporary export for react demos
-export * from './temp/dropdown.element.js'
+export * from './temp/dropdown.element.js';

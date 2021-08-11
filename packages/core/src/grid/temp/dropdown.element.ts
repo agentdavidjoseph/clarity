@@ -18,6 +18,8 @@ export class CdsDropdown extends LitElement {
 
   @property({ type: String, reflect: true }) anchor: HTMLElement | string | null;
 
+  @property({ type: Boolean, reflect: true }) hidden = true;
+
   @query('.content', true) content: HTMLElement;
 
   @querySlotAll('[tabindex]') keyListItems: NodeListOf<HTMLElement>;
@@ -82,11 +84,11 @@ export class CdsDropdown extends LitElement {
           display: none !important;
         }
 
-        :host([hidden='true']) {
+        :host([hidden=true]) {
           display: none !important;
         }
 
-        :host([hidden='false']) {
+        :host([hidden=false]) {
           display: block !important;
         }
 
