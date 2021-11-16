@@ -29,7 +29,7 @@ const config = {
   baseDir: './src',
   outDir: './dist/core',
   entryPoints: {
-    modules: ['./src', './src/internal', './src/polyfills', './src/test'],
+    modules: ['./src', './src/internal', './src/polyfills', './src/test', './src/audio'],
     components: [
       './src/accordion',
       './src/alert',
@@ -81,6 +81,8 @@ const config = {
     ],
     assets: ['./README.md'],
     explicitExports: [
+      { input: './audio/sounds/*', output: './audio/sounds/*' },
+      { input: './audio/audio.service.js', output: './audio/audio.service.js' },
       { input: './icon/shapes/*', output: './icon/shapes/*' },
       { input: './icon/icon.service.js', output: './icon/icon.service.js' },
       { input: './polyfills/index.js', output: './polyfills/index.js' },
